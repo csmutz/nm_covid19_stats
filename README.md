@@ -5,4 +5,6 @@ backend is python/bash
 
 frontent relies on highcharts
 
+configured to provide statistics for east mountains zip codes
+
 MIT license

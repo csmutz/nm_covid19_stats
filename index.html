@@ -1,18 +1,75 @@
 <!DOCTYPE html>
 <html lang='en-US'>
 <head>
-<title>COVID-19 by Zip Codes</title>
+<title>COVID-19 in East Mountains</title>
+<link rel="stylesheet" href="mvp.css">
 </head>
 <body>
 
+<script src="code/highcharts.js"></script>
+<script src="code/modules/data.js"></script>
+<script src="code/modules/series-label.js"></script>
+<script src="code/modules/exporting.js"></script>
+<script src="code/modules/export-data.js"></script>
+<script src="code/modules/accessibility.js"></script>
 
-<!--requires highcarts-->
-<script src="https://code.highcharts.com/highcharts.js"></script>
-<script src="https://code.highcharts.com/modules/data.js"></script>
-<script src="https://code.highcharts.com/modules/series-label.js"></script>
-<script src="https://code.highcharts.com/modules/exporting.js"></script>
-<script src="https://code.highcharts.com/modules/export-data.js"></script>
-<script src="https://code.highcharts.com/modules/accessibility.js"></script>
+<table>
+<tr><th>7-day Average Daily New Cases/Million</th><th>14-day Total New Cases/100K</th><th>Risk Level</th></tr>
+<tr><th><div id="count_7"></div></th><th><div id="count_14"></div></th><th id="risk_container"><div id="risk"></div></th></tr>
+</table>
+
+
+<script type="text/javascript">
+
+var getJSON = function(url, callback) {
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET', url, true);
+    xhr.responseType = 'json';
+    xhr.onload = function() {
+      var status = xhr.status;
+      if (status === 200) {
+        callback(null, xhr.response);
+      } else {
+        callback(status, xhr.response);
+      }
+    };
+    xhr.send();
+};
+
+getJSON('https://yoursite.com/covid19/14_day.json?' + Date.now(),
+function(err, data) {
+    //alert('Your query count: ' + data.query.count);
+    document.getElementById("count_14").appendChild(document.createTextNode(data));
+
+    if (data < 5) {
+         document.getElementById("risk").appendChild(document.createTextNode("Lowest"));
+         document.getElementById("risk_container").style.background = "blue";
+    } else if (data < 20) {
+         document.getElementById("risk").appendChild(document.createTextNode("Lower"));
+         document.getElementById("risk_container").style.background = "green";
+    } else if (data < 50) {
+         document.getElementById("risk").appendChild(document.createTextNode("Moderate"));
+         document.getElementById("risk_container").style.background = "yellow";
+    } else if (data < 200) {
+         document.getElementById("risk").appendChild(document.createTextNode("Higher"));
+         document.getElementById("risk_container").style.background = "orange";
+    } else {
+         document.getElementById("risk").appendChild(document.createTextNode("Highest"));
+         document.getElementById("risk_container").style.background = "red";
+    }
+     
+});
+
+getJSON('https://yoursite.com/covid19/7_day.json?' + Date.now(),
+function(err, data) {
+    //alert('Your query count: ' + data.query.count);
+    document.getElementById("count_7").appendChild(document.createTextNode(data));
+});
+
+
+</script>
+
+
 
 <figure class="highcharts-figure">
     <div id="container_delta"></div>
@@ -32,12 +89,8 @@ Highcharts.chart('container_delta', {
         type: 'column'
     },
     title: {
-        text: 'New COVID-19 Cases by Zip Code'
+        text: 'New COVID-19 Cases in East Mountains'
     },
-    subtitle: {
-                text: 'Source: New Mexico Department of Health'
-    },
-
     data: {
         csvURL: 'https://yoursite.com/covid19/covid_delta.csv?' + Date.now(),
         beforeParse: function (csv) {
@@ -60,7 +113,7 @@ Highcharts.chart('container_delta', {
     },
 
     yAxis: {
-        min: 0,
+//        min: 0,
         title: {
             text: 'New COVID-19 Cases'
         },
@@ -127,12 +180,12 @@ Highcharts.chart('container', {
     },
 
     title: {
-        text: 'Total COVID-19 Cases by Zip Code'
+        text: 'Total COVID-19 Cases in East Mountains'
     },
 
-    subtitle: {
-        text: 'Source: New Mexico Department of Health'
-    },
+//    subtitle: {
+//        text: 'Source: New Mexico Department of Health'
+//    },
 
     xAxis: {
         tickInterval: 7 * 24 * 3600 * 1000, // one week
@@ -218,8 +271,25 @@ Highcharts.chart('container', {
     });
 </script>
 
+<p>COVID-19 Data source: New Mexico Dept of Health<br />
+Zip Code Data Source: ZipDataMaps.com</p>
+<!--Zip data from https://www.zipdatamaps.com/ -->
+
+<table>
+<tr><th>Zip</th><th>Name</th><th>Population</th></tr>
+<tr><td>87008</td><td>Cedar Crest</td><td>2600</td></tr>
+<tr><td>87015</td><td>Edgewood</td><td>13100</td></tr>
+<tr><td>87016</td><td>Estancia</td><td>3700</td></tr>
+<tr><td>87032</td><td>McIntosh</td><td>300</td></tr>
+<tr><td>87035</td><td>Moriary</td><td>7300</td></tr>
+<tr><td>87047</td><td>Sandia Park</td><td>4900</td></tr>
+<tr><td>87056</td><td>Stanley</td><td>1000</td></tr>
+<tr><td>87059</td><td>Tijeras</td><td>9600</td></tr>
+</table>
 
 
+<p>Data from previous data is pulled every morning from NM Dept of Health website. "Total" counts are counts of confirmed COVID-19 since start of pandemic. "New" cases are simply daily changes in count. On some days, the total count drops, resulting in negative new cases reported. The cause of these drops is not known to the author of this site.</p>
+
+<p>Risk level based on CDC new cases thresholds for transmission in schools</p>
+<!-- https://www.cdc.gov/coronavirus/2019-ncov/community/schools-childcare/indicators.html#thresholds -->
 </body>
-</html>
-
