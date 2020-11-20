@@ -14,9 +14,9 @@
 <script src="code/modules/accessibility.js"></script>
 
 <table>
-<tr><th>7-day Average Daily<br />New Cases/Million</th><th>Covidexitstrategy<br />Score</th><th>14-day Total<br />New Cases/100K</th><th>CDC<br />Risk Level</th><th>Likelyhood of contagious<br />person in gathering of 100</th></tr>
+<tr><th>7-day Average Daily<br />New Cases/Million</th><th>Covidexitstrategy<br />Score</th><th>14-day Total<br />New Cases/100K</th><th>CDC<br />Risk Level</th><th>Exposure Risk<br />gathering of 10</th><th>Exposure Risk<br />gathering of 100</th></tr>
 <tr><th id="count_7_container"><div id="count_7"></div></th><th id="exit_risk_container"><div id="exit_risk"></div></th><th id="count_14_container"><div id="count_14"></div></th><th id="cdc_risk_container"><div id="cdc_risk"></div></th>
-<th id="gathering_container"><div id="gathering"></div></th></tr>
+<th id="gathering_10_container"><div id="gathering_10"><th id="gathering_100_container"><div id="gathering_100"></div></th></tr>
 </table>
 
 
@@ -37,46 +37,85 @@ var getJSON = function(url, callback) {
     xhr.send();
 };
 
+getJSON('https://yoursite.com/covid19/10_day.json?' + Date.now(),
+function(err, data) {
+
+    gathering_risk = Number.parseFloat((1-((1-(data*5)) ** 10))*100).toFixed(0);
+    if (gathering_risk < 2) {
+         document.getElementById("gathering_10_container").style.background = "gray";
+    } else if (gathering_risk < 10) {
+         document.getElementById("gathering_10_container").style.background = "yellow";
+    } else if (gathering_risk < 50) {
+         document.getElementById("gathering_10_container").style.background = "orange";
+    } else if (gathering_risk < 99) {
+         document.getElementById("gathering_10_container").style.background = "red";
+    } else {
+        document.getElementById("gathering_10_container").style.background = "darkred";
+    }
+    if (gathering_risk > 99) {
+        gathering_risk = "> 99";
+    } else {
+        gathering_risk = gathering_risk.toString();
+    }
+    gathering_risk = gathering_risk + '%';
+    document.getElementById("gathering_10").appendChild(document.createTextNode(gathering_risk));
+
+    //100
+    gathering_risk = Number.parseFloat((1-((1-(data*5)) ** 100))*100).toFixed(0);
+
+    if (gathering_risk < 2) {
+         document.getElementById("gathering_100_container").style.background = "gray";
+    } else if (gathering_risk < 10) {
+         document.getElementById("gathering_100_container").style.background = "yellow";
+    } else if (gathering_risk < 50) {
+         document.getElementById("gathering_100_container").style.background = "orange";
+    } else if (gathering_risk < 99) {
+         document.getElementById("gathering_100_container").style.background = "red";
+    } else {
+        document.getElementById("gathering_100_container").style.background = "darkred";
+    }
+    if (gathering_risk > 99) {
+        gathering_risk = "> 99";
+    } else {
+        gathering_risk = gathering_risk.toString();
+    }
+    gathering_risk = gathering_risk + '%';
+    document.getElementById("gathering_100").appendChild(document.createTextNode(gathering_risk));
+
+});
+
+
+
 getJSON('https://yoursite.com/covid19/14_day.json?' + Date.now(),
 function(err, data) {
-    //alert('Your query count: ' + data.query.count);
     document.getElementById("count_14").appendChild(document.createTextNode(data));
-
-    document.getElementById("gathering").appendChild(document.createTextNode(Number.parseFloat(data*4/14).toFixed(1)));
-    document.getElementById("gathering").appendChild(document.createTextNode('%'));
 
     if (data < 5) {
          document.getElementById("cdc_risk").appendChild(document.createTextNode("Lowest"));
          document.getElementById("cdc_risk_container").style.background = "blue";
          document.getElementById("count_14_container").style.background = "blue";
-         document.getElementById("gathering_container").style.background = "blue";
     } else if (data < 20) {
          document.getElementById("cdc_risk").appendChild(document.createTextNode("Lower"));
          document.getElementById("cdc_risk_container").style.background = "green";
          document.getElementById("count_14_container").style.background = "green";
-         document.getElementById("gathering_container").style.background = "green";
     } else if (data < 50) {
          document.getElementById("cdc_risk").appendChild(document.createTextNode("Moderate"));
          document.getElementById("cdc_risk_container").style.background = "yellow";
          document.getElementById("count_14_container").style.background = "yellow";
-         document.getElementById("gathering_container").style.background = "yellow";
     } else if (data < 200) {
          document.getElementById("cdc_risk").appendChild(document.createTextNode("Higher"));
          document.getElementById("cdc_risk_container").style.background = "orange";
          document.getElementById("count_14_container").style.background = "orange";
-         document.getElementById("gathering_container").style.background = "orange";
     } else {
          document.getElementById("cdc_risk").appendChild(document.createTextNode("Highest"));
          document.getElementById("cdc_risk_container").style.background = "red";
          document.getElementById("count_14_container").style.background = "red";
-         document.getElementById("gathering_container").style.background = "red";
     }
      
 });
 
 getJSON('https://yoursite.com/covid19/7_day.json?' + Date.now(),
 function(err, data) {
-    //alert('Your query count: ' + data.query.count);
     document.getElementById("count_7").appendChild(document.createTextNode(data));
     if (data < 40) {
          document.getElementById("exit_risk").appendChild(document.createTextNode("Trending Better"));
@@ -95,15 +134,9 @@ function(err, data) {
          document.getElementById("exit_risk_container").style.background = "darkred";
          document.getElementById("count_7_container").style.background = "darkred";
     }
-
-
-
 });
 
-
 </script>
-
-
 
 <figure class="highcharts-figure">
     <div id="container_delta"></div>
@@ -126,7 +159,6 @@ function(err, data) {
 <script type="text/javascript">
     window.addEventListener('DOMContentLoaded', function (event) {
 
-
 Highcharts.chart('container_delta', {
     chart: {
         type: 'column'
@@ -140,10 +172,6 @@ Highcharts.chart('container_delta', {
             return csv.replace(/\n\n/g, '\n');
         }
     },
-
-//    xAxis: {
-//        categories: ['Apples', 'Oranges', 'Pears', 'Grapes', 'Bananas']
-//    },
     xAxis: {
         tickInterval: 7 * 24 * 3600 * 1000, // one week
         tickWidth: 0,
@@ -171,29 +199,13 @@ Highcharts.chart('container_delta', {
             }
         }
     },
-/*
-    legend: {
-        align: 'left',
-        x: -30,
-        verticalAlign: 'top',
-        y: 25,
-        floating: true,
-        backgroundColor:
-            Highcharts.defaultOptions.legend.backgroundColor || 'white',
-        borderColor: '#CCC',
-        borderWidth: 1,
-        shadow: false
-    },
-*/  
     legend: {
         align: 'left',
         verticalAlign: 'top',
         borderWidth: 0
     },
     tooltip: {
-//        headerFormat: '<b>foobar</b><br/>',
         headerFormat: '<b>{point.x:%A, %b %e, %Y}</b><br/>',
-//        headerFormat: '<b>{Highcharts.dateFormat('%A, %b %e, %Y', point.x)}</b><br/>',
         pointFormat: '{series.name}: {point.y}<br/>Total: {point.stackTotal}'
     },
     plotOptions: {
@@ -205,74 +217,6 @@ Highcharts.chart('container_delta', {
         }
     }
 });
-
-/*
-Highcharts.chart('container_delta_100k', {
-    chart: {
-        type: 'column'
-    },
-    title: {
-        text: 'New COVID-19 Cases in East Mountains per 100k population'
-    },
-    data: {
-        csvURL: 'https://yoursite.com/covid19/covid_delta_100k.csv?' + Date.now(),
-        beforeParse: function (csv) {
-            return csv.replace(/\n\n/g, '\n');
-        }
-    },
-
-//    xAxis: {
-//        categories: ['Apples', 'Oranges', 'Pears', 'Grapes', 'Bananas']
-//    },
-    xAxis: {
-        tickInterval: 7 * 24 * 3600 * 1000, // one week
-        tickWidth: 0,
-        gridLineWidth: 1,
-        labels: {
-            align: 'center',
-            x: 3,
-            y: 10
-        }
-    },
-
-    yAxis: {
-//        min: 0,
-        title: {
-            text: 'New COVID-19 Cases per 100k'
-        },
-        stackLabels: {
-            enabled: true,
-            style: {
-                fontWeight: 'bold',
-                color: ( // theme
-                    Highcharts.defaultOptions.title.style &&
-                    Highcharts.defaultOptions.title.style.color
-                ) || 'gray'
-            }
-        }
-    },
-    legend: {
-        align: 'left',
-        verticalAlign: 'top',
-        borderWidth: 0
-    },
-    tooltip: {
-//        headerFormat: '<b>foobar</b><br/>',
-        headerFormat: '<b>{point.x:%A, %b %e, %Y}</b><br/>',
-//        headerFormat: '<b>{Highcharts.dateFormat('%A, %b %e, %Y', point.x)}</b><br/>',
-        pointFormat: '{series.name}: {point.y}<br/>Total: {point.stackTotal}'
-    },
-    plotOptions: {
-        column: {
-            stacking: 'normal',
-            dataLabels: {
-                enabled: true
-            }
-        }
-    }
-});
-*/
-
 
 Highcharts.chart('container', {
 
@@ -292,11 +236,6 @@ Highcharts.chart('container', {
     title: {
         text: 'Total COVID-19 Cases in East Mountains'
     },
-
-//    subtitle: {
-//        text: 'Source: New Mexico Department of Health'
-//    },
-
     xAxis: {
         tickInterval: 7 * 24 * 3600 * 1000, // one week
         tickWidth: 0,
@@ -321,24 +260,6 @@ Highcharts.chart('container', {
         },
         showFirstLabel: false
     }
-/*
-,       
-        { // right y axis
-        linkedTo: 0,
-        gridLineWidth: 0,
-        opposite: true,
-        title: {
-            text: null
-        },
-        labels: {
-            align: 'right',
-            x: 13,
-            y: 16,
-            format: '{value:.,0f}'
-        },
-        showFirstLabel: false
-    }
-*/
     ],
 
     legend: {
@@ -397,11 +318,6 @@ Highcharts.chart('container_100k', {
     title: {
         text: 'Total COVID-19 Cases in East Mountains per 100k population'
     },
-
-//    subtitle: {
-//        text: 'Source: New Mexico Department of Health'
-//    },
-
     xAxis: {
         tickInterval: 7 * 24 * 3600 * 1000, // one week
         tickWidth: 0,
@@ -426,24 +342,6 @@ Highcharts.chart('container_100k', {
         },
         showFirstLabel: false
     }
-/*
-,
-        { // right y axis
-        linkedTo: 0,
-        gridLineWidth: 0,
-        opposite: true,
-        title: {
-            text: null
-        },
-        labels: {
-            align: 'right',
-            x: 13,
-            y: 16,
-            format: '{value:.,0f}'
-        },
-        showFirstLabel: false
-    }
-*/
     ],
 
     legend: {
@@ -504,7 +402,7 @@ Zip Code Data Source: <a href="https://www.zipdatamaps.com/">ZipDataMaps.com</a>
 
 <p>Data from previous data is pulled every morning from NM Dept of Health website. "Total" counts are counts of confirmed COVID-19 since start of pandemic. "New" cases are simply daily changes in count. On some days, the total count drops, resulting in negative new cases reported. The cause of these drops is not known to the author of this site.</p>
 
-<p>Score based on <a href="https://www.covidexitstrategy.org/definitions-and-criteria">Covidexitstrategy Criteria</a>. Risk level based on <a href="https://www.cdc.gov/coronavirus/2019-ncov/community/schools-childcare/indicators.html#thresholds">CDC thresholds for schools</a>. The "likelyhood of contagious person in gathering of 100" is similar to <a href="https://covid19risk.biosci.gatech.edu">Georgia Tech Event Risk Asessment Tool</a> using ascertainment bias (number of cases per each positive test) of 4 and period of contagiousness of 10 days. All of these metrics are based solely on current local transmission rates combining all listed zip codes. Other metrics like test positivity rate are not represented because this data is not available at zip code level.</p>
+<p>Score based on <a href="https://www.covidexitstrategy.org/definitions-and-criteria">Covidexitstrategy Criteria</a>. Risk level based on <a href="https://www.cdc.gov/coronavirus/2019-ncov/community/schools-childcare/indicators.html#thresholds">CDC thresholds for schools</a>. Exposure Risk is the likelyhood that someone a in gathering of 100 is contagious. This is based on <a href="https://covid19risk.biosci.gatech.edu">Georgia Tech Event Risk Asessment Tool</a> using ascertainment bias (number of cases per each positive test) of 5 and period of contagiousness of 10 days. All of these metrics are based solely on current local transmission rates combining all listed zip codes. Other metrics like test positivity rate are not represented because this data is not available at zip code level.</p>
 
 </body>
 </html>

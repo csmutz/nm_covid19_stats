@@ -1,6 +1,4 @@
 #!/usr/bin/env python3
-
-
 '''
 install to /usr/local/bin
 make sure directories are right
@@ -36,6 +34,7 @@ delta_rows_100k = []
 last_row = None
 count_14_day = 0
 count_7_day = 0
+count_10_day = 0
 
 for i in range(days):
     date_downloaded = datetime.datetime.utcfromtimestamp(now-86400*(days-i-1)).strftime("%Y-%m-%d")
@@ -61,9 +60,11 @@ for i in range(days):
             for z in zip_codes:
                 delta_row[z] = row[z] - last_row[z]
                 delta_row_100k[z] = round((row[z] - last_row[z])*100000/population_by_zip[z])
-                if i >= (days - 14 - 1):
+                if i >= (days - 14):
                     count_14_day = count_14_day + delta_row[z]
-                if i >= (days - 7 - 1):
+                if i >= (days - 10):
+                    count_10_day = count_10_day + delta_row[z]
+                if i >= (days - 7):
                     count_7_day = count_7_day + delta_row[z]
         else:
             for z in zip_codes:
@@ -119,6 +120,10 @@ with open(outdir + "covid_delta_100k.csv", 'w') as outfile:
 #14 day new cases per 100K (not daily average)
 with open(outdir + "14_day.json", 'w') as outfile:
     json.dump(int(count_14_day * 100000.0 / total_population), outfile)
+
+#10 day new cases per capita
+with open(outdir + "10_day.json", 'w') as outfile:
+        json.dump((count_10_day / total_population), outfile)
 
 #7 day daily average new cases per 1M
 with open(outdir + "7_day.json", 'w') as outfile:
