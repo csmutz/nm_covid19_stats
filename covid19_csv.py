@@ -125,8 +125,8 @@ with open(outdir + "14_day.json", 'w') as outfile:
 with open(outdir + "10_day.json", 'w') as outfile:
         json.dump((count_10_day / total_population), outfile)
 
-#7 day daily average new cases per 1M
+#7 day total new cases per 1M (not daily average)
 with open(outdir + "7_day.json", 'w') as outfile:
-        json.dump(int(count_7_day * 1000000.0 / total_population / 7), outfile)
+        json.dump(int(count_7_day * 1000000.0 / total_population ), outfile)
 
 

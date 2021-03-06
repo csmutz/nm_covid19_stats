@@ -1,12 +1,16 @@
 #!/bin/bash
 
 #collect covid data from NM health API
-#put in /etc/cron.daily/
 
 OUT_FILENAME=`date "+%Y-%m-%d.json"`
 
 curl -s "https://e7p503ngy5.execute-api.us-west-2.amazonaws.com/prod/GetPublicZipsData" > "/var/log/covid/$OUT_FILENAME"
 chmod o+r "/var/log/covid/$OUT_FILENAME"
 
+OUT_FILENAME=`date "+vaccine-%Y-%m-%d.json"`
+curl -s "https://cvvaccine.nmhealth.org/api/GetCounties" > "/var/log/covid/$OUT_FILENAME"
+chmod o+r "/var/log/covid/$OUT_FILENAME"
+
 /usr/local/bin/covid19_csv.py
+/usr/local/bin/cvvaccine_csv.py
 

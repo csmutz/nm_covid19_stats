@@ -14,11 +14,17 @@
 <script src="code/modules/accessibility.js"></script>
 
 <table>
-<tr><th>7-day Average Daily<br />New Cases/Million</th><th>Covidexitstrategy<br />Score</th><th>14-day Total<br />New Cases/100K</th><th>CDC<br />Risk Level</th><th>Exposure Risk<br />gathering of 10</th><th>Exposure Risk<br />gathering of 100</th></tr>
+<tr><th>7-day Average Daily<br />New Cases/100K</th><th>Covidactnow<br />Score</th><th>7-day Total<br />New Cases/100K</th><th>CDC<br />Risk Level</th><th>Exposure Risk<br />gathering of 10</th><th>Exposure Risk<br />gathering of 100</th></tr>
 <tr><th id="count_7_container"><div id="count_7"></div></th><th id="exit_risk_container"><div id="exit_risk"></div></th><th id="count_14_container"><div id="count_14"></div></th><th id="cdc_risk_container"><div id="cdc_risk"></div></th>
 <th id="gathering_10_container"><div id="gathering_10"><th id="gathering_100_container"><div id="gathering_100"></div></th></tr>
 </table>
 
+<br />
+<a href="https://covidactnow.org/us/new_mexico-nm/county/torrance_county/">Torrance County Statistics from CovidActNow</a>
+
+<!--
+	<div class="covid-act-now-embed" data-fips-id="35057" /><script src="https://covidactnow.org/scripts/embed.js"></script>
+		-->
 
 <script type="text/javascript">
 
@@ -40,7 +46,7 @@ var getJSON = function(url, callback) {
 getJSON('https://yoursite.com/covid19/10_day.json?' + Date.now(),
 function(err, data) {
 
-    gathering_risk = Number.parseFloat((1-((1-(data*5)) ** 10))*100).toFixed(0);
+    gathering_risk = Number.parseFloat((1-((1-(data*3)) ** 10))*100).toFixed(0);
     if (gathering_risk < 2) {
          document.getElementById("gathering_10_container").style.background = "gray";
     } else if (gathering_risk < 10) {
@@ -61,7 +67,7 @@ function(err, data) {
     document.getElementById("gathering_10").appendChild(document.createTextNode(gathering_risk));
 
     //100
-    gathering_risk = Number.parseFloat((1-((1-(data*5)) ** 100))*100).toFixed(0);
+    gathering_risk = Number.parseFloat((1-((1-(data*3)) ** 100))*100).toFixed(0);
 
     if (gathering_risk < 2) {
          document.getElementById("gathering_100_container").style.background = "gray";
@@ -86,28 +92,26 @@ function(err, data) {
 
 
 
-getJSON('https://yoursite.com/covid19/14_day.json?' + Date.now(),
+//getJSON('https://yoursite.com/covid19/14_day.json?' + Date.now(),
+getJSON('https://yoursite.com/covid19/7_day.json?' + Date.now(),
 function(err, data) {
+    //move to total case in last 7 dates per 100k
+    data = Number.parseFloat(data/10).toFixed(1);
     document.getElementById("count_14").appendChild(document.createTextNode(data));
-
-    if (data < 5) {
-         document.getElementById("cdc_risk").appendChild(document.createTextNode("Lowest"));
+    if (data < 10) {
+         document.getElementById("cdc_risk").appendChild(document.createTextNode("Low"));
          document.getElementById("cdc_risk_container").style.background = "blue";
          document.getElementById("count_14_container").style.background = "blue";
-    } else if (data < 20) {
-         document.getElementById("cdc_risk").appendChild(document.createTextNode("Lower"));
-         document.getElementById("cdc_risk_container").style.background = "green";
-         document.getElementById("count_14_container").style.background = "green";
     } else if (data < 50) {
          document.getElementById("cdc_risk").appendChild(document.createTextNode("Moderate"));
          document.getElementById("cdc_risk_container").style.background = "yellow";
          document.getElementById("count_14_container").style.background = "yellow";
-    } else if (data < 200) {
-         document.getElementById("cdc_risk").appendChild(document.createTextNode("Higher"));
+    } else if (data < 100) {
+         document.getElementById("cdc_risk").appendChild(document.createTextNode("Substantial"));
          document.getElementById("cdc_risk_container").style.background = "orange";
          document.getElementById("count_14_container").style.background = "orange";
     } else {
-         document.getElementById("cdc_risk").appendChild(document.createTextNode("Highest"));
+         document.getElementById("cdc_risk").appendChild(document.createTextNode("High"));
          document.getElementById("cdc_risk_container").style.background = "red";
          document.getElementById("count_14_container").style.background = "red";
     }
@@ -116,30 +120,42 @@ function(err, data) {
 
 getJSON('https://yoursite.com/covid19/7_day.json?' + Date.now(),
 function(err, data) {
+    //make 100k instead of 1M
+    data = Number.parseFloat(data/(10 * 7)).toFixed(1);
     document.getElementById("count_7").appendChild(document.createTextNode(data));
-    if (data < 40) {
-         document.getElementById("exit_risk").appendChild(document.createTextNode("Trending Better"));
+    if (data < 1) {
+         document.getElementById("exit_risk").appendChild(document.createTextNode("Low"));
          document.getElementById("exit_risk_container").style.background = "green";
          document.getElementById("count_7_container").style.background = "green";
-    } else if (data < 80) {
-         document.getElementById("exit_risk").appendChild(document.createTextNode("Caution Warranted"));
+    } else if (data < 10) {
+         document.getElementById("exit_risk").appendChild(document.createTextNode("Medium"));
          document.getElementById("exit_risk_container").style.background = "yellow";
          document.getElementById("count_7_container").style.background = "yellow";
-    } else if (data < 150) {
-         document.getElementById("exit_risk").appendChild(document.createTextNode("Trending Poorly"));
+    } else if (data < 25) {
+         document.getElementById("exit_risk").appendChild(document.createTextNode("High"));
+         document.getElementById("exit_risk_container").style.background = "orange";
+         document.getElementById("count_7_container").style.background = "orange";	    
+    } else if (data < 75) {
+         document.getElementById("exit_risk").appendChild(document.createTextNode("Critical"));
          document.getElementById("exit_risk_container").style.background = "red";
          document.getElementById("count_7_container").style.background = "red";
     } else  {
-         document.getElementById("exit_risk").appendChild(document.createTextNode("Uncontrolled Spread"));
+         document.getElementById("exit_risk").appendChild(document.createTextNode("Severe"));
          document.getElementById("exit_risk_container").style.background = "darkred";
          document.getElementById("count_7_container").style.background = "darkred";
     }
+
 });
 
 </script>
 
+
 <figure class="highcharts-figure">
     <div id="container_delta"></div>
+</figure>
+
+<figure class="highcharts-figure">
+    <div id="container_vaccine"></div>
 </figure>
 
 <figure class="highcharts-figure">
@@ -217,6 +233,89 @@ Highcharts.chart('container_delta', {
         }
     }
 });
+
+Highcharts.chart('container_vaccine', {
+
+    chart: {
+        scrollablePlotArea: {
+            minWidth: 700
+        }
+    },
+
+    data: {
+        csvURL: 'https://yoursite.com/covid19/vaccine.csv?' + Date.now(),
+        beforeParse: function (csv) {
+            return csv.replace(/\n\n/g, '\n');
+        }
+    },
+
+    title: {
+        text: 'Vaccinations in Torrance County'
+    },
+    xAxis: {
+        tickInterval: 7 * 24 * 3600 * 1000, // one week
+        tickWidth: 0,
+        gridLineWidth: 1,
+        labels: {
+            align: 'center',
+            x: 3,
+            y: 10
+        }
+    },
+
+    yAxis: [{ // left y axis
+        title: {
+            text: 'Percent'
+        },
+        labels: {
+            align: 'right',
+            x: -13,
+            y: 16,
+            //offset: 20,
+            format: '{value:.,0f}'
+        },
+        showFirstLabel: false
+    }
+    ],
+
+    legend: {
+        align: 'left',
+        verticalAlign: 'top',
+        borderWidth: 0
+    },
+    
+    tooltip: {
+        shared: true,
+        crosshairs: true
+    },
+
+    plotOptions: {
+        series: {
+            cursor: 'pointer',
+            point: {
+                events: {
+                    click: function (e) {
+                        hs.htmlExpand(null, {
+                            pageOrigin: {
+                                x: e.pageX || e.clientX,
+                                y: e.pageY || e.clientY
+                            },
+                            headingText: this.series.name,
+                            maincontentText: Highcharts.dateFormat('%A, %b %e, %Y', this.x) + ':<br/> ' +
+                                this.y + ' sessions',
+                            width: 200
+                        });
+                    }
+                }
+            },
+            marker: {
+                lineWidth: 1
+            }
+        }
+    }
+});
+
+
 
 Highcharts.chart('container', {
 
@@ -400,9 +499,10 @@ Highcharts.chart('container_100k', {
 <p>COVID-19 Data source: <a href="https://cv.nmhealth.org/">New Mexico Dept of Health</a><br />
 Zip Code Data Source: <a href="https://www.zipdatamaps.com/">ZipDataMaps.com</a></p>
 
-<p>Data from previous data is pulled every morning from NM Dept of Health website. "Total" counts are counts of confirmed COVID-19 since start of pandemic. "New" cases are simply daily changes in count. On some days, the total count drops, resulting in negative new cases reported. The cause of these drops is not known to the author of this site.</p>
+<p>Data from previous data is pulled every morning from NM Dept of Health website. "Total" counts are counts of confirmed COVID-19 since start of pandemic. "New" cases are simply daily changes in count. NM Dept of Health occasionally makes <a href="https://cv.nmhealth.org/2020/11/19/new-mexico-covid-19-update-3675-new-cases-totaling-74116/">corrections to data</a>. These corrections do not impact historical data presented here, so they may result in negative cases counts on the day of the correction.</p>
 
-<p>Score based on <a href="https://www.covidexitstrategy.org/definitions-and-criteria">Covidexitstrategy Criteria</a>. Risk level based on <a href="https://www.cdc.gov/coronavirus/2019-ncov/community/schools-childcare/indicators.html#thresholds">CDC thresholds for schools</a>. Exposure Risk is the likelyhood that someone a in gathering of 100 is contagious. This is based on <a href="https://covid19risk.biosci.gatech.edu">Georgia Tech Event Risk Asessment Tool</a> using ascertainment bias (number of cases per each positive test) of 5 and period of contagiousness of 10 days. All of these metrics are based solely on current local transmission rates combining all listed zip codes. Other metrics like test positivity rate are not represented because this data is not available at zip code level.</p>
+<p>Score based on <a href="https://covidactnow.org/covid-risk-levels-metrics">CovidActNow Criteria</a>. Risk level based on <a href="https://www.cdc.gov/coronavirus/2019-ncov/community/schools-childcare/operation-strategy.html#indicators">Updated CDC indicators and thresholds for schools</a>. Exposure Risk is the likelyhood that someone a in gathering of 100 is contagious. This is based on <a href="https://covid19risk.biosci.gatech.edu">Georgia Tech Event Risk Asessment Tool</a> using ascertainment bias (number of cases per each positive test) of 3 and period of contagiousness of 10 days. All of these metrics are based solely on current local transmission rates combining all listed zip codes. Other metrics like test positivity rate are not represented because this data is not available at zip code level.</p>
+<p>Torrance County statistics are linked for statistics that are only available at county level. Ex. test positivity rate. Torrance county statistics very closely mirror larger East Mountain statistics based on zip code. Ex. Daily case counts are very close.</>
 
 </body>
 </html>
